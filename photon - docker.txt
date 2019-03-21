@@ -1,23 +1,24 @@
-Project Photon OS™ is an open source, minimal Linux container host that is optimized for cloud-native applications, cloud platforms, and VMware infrastructure. 
+Project Photon OS is an open source, minimal Linux container host that is optimized for cloud-native applications, cloud platforms, and VMware infrastructure.
 
 	https://vmware.github.io/photon/
 
 	Photon OS 3.0 introduces ARM64 support (Raspberry Pi3)
 
-	Documentación: https://vmware.github.io/photon/assets/files/html/3.0/
-	
+	Documentaciï¿½n: https://vmware.github.io/photon/assets/files/html/3.0/
+
 
 	OVA: photon-hw11-3.0-26156e2.ova
 	PassRoot: changeme
+			Nueva: ptro,56!$
 
 
-	Networking 
-	
-		hay que remover el archivo que viene de manera predeterminada para dhcp en el caso de querer usar estático:
+	Networking
+
+		hay que remover el archivo que viene de manera predeterminada para dhcp en el caso de querer usar estï¿½tico:
 
 			root@photon-machine [ ~ ]# mv /etc/systemd/network/99-dhcp-en.network /etc/systemd/network/10-static-en.network
 
-		root@photon-machine [ ~ ]# cat /etc/systemd/network/10-static-en.network 
+		root@photon-machine [ ~ ]# cat /etc/systemd/network/10-static-en.network
 		[Match]
 		Name=eth0
 
@@ -38,15 +39,15 @@ Project Photon OS™ is an open source, minimal Linux container host that is optim
 
 		Levantar el demonio de docker:
 
-			systemctl status docker.service 
+			systemctl status docker.service
 			systemctl enable docker.service
 			ip a
-			systemctl start docker.service 
-			systemctl status docker.service 
+			systemctl start docker.service
+			systemctl status docker.service
 			ip a
 
 
-		root@photon-machine [ ~ ]# docker info 
+		root@photon-machine [ ~ ]# docker info
 		Containers: 0
 		 Running: 0
 		 Paused: 0
@@ -93,28 +94,28 @@ Project Photon OS™ is an open source, minimal Linux container host that is optim
 		Live Restore Enabled: false
 
 
-		Comandos básicos (http://www.virten.net/2015/04/basic-commands-for-vmware-photon-and-docker/)
+		Comandos bï¿½sicos (http://www.virten.net/2015/04/basic-commands-for-vmware-photon-and-docker/)
 
 
 				- Version e Info				docker version, docker info
 
-				- Listar imágenes				docker images
-				- Buscar imágenes				docker search xxx
-				- Bajar imágenes				docker pull <image>
-				- Bajar imágen verificando confianza		DOCKER_CONTENT_TRUST=1 docker pull <image>	(https://docs.docker.com/docker-hub/publish/trustchain/)
+				- Listar imï¿½genes				docker images
+				- Buscar imï¿½genes				docker search xxx
+				- Bajar imï¿½genes				docker pull <image>
+				- Bajar imï¿½gen verificando confianza		DOCKER_CONTENT_TRUST=1 docker pull <image>	(https://docs.docker.com/docker-hub/publish/trustchain/)
 				- Remover imagen				docker rmi xxxx
 
-				- Correr una imágen (se crea un container)	docker run xxx    (--restart=always para autoarranque)
+				- Correr una imï¿½gen (se crea un container)	docker run xxx    (--restart=always para autoarranque)
 				- Ver logs de actividad del contenedor		docker logs -f xxx
 				- Listar containers				docker ps -a
 				- Remover containers				docker rm xxxxx
 
-				- Detener la ejecución de un contenedor		docker stop
+				- Detener la ejecuciï¿½n de un contenedor		docker stop
 				- Relanzar un contenedor			docker start
 
 				- Ejecutar comandos dentro del contenedor	docker exec
 
-		Configuración de docker para su salida hacia Internet vía Proxy
+		Configuraciï¿½n de docker para su salida hacia Internet vï¿½a Proxy
 
 			root@photon-machine [ ~ ]#mkdir /etc/systemd/system/docker.service.d/
 			root@photon-machine [ ~ ]# cat /etc/systemd/system/docker.service.d/http-proxy.conf
@@ -130,7 +131,7 @@ Project Photon OS™ is an open source, minimal Linux container host that is optim
 Jenkins
 
 	Creo el directorio /var/jenkins_home para tener la persistencia de los datos del contenedor de Jenkins sobre Photon
-	
+
 		root@photon-machine [ ~ ]# mkdir /var/jenkins_home
 
 		docker run -u root -d -p 8080:8080 -v /var/jenkins_home:/var/jenkins_home jenkinsci/blueocean
@@ -144,37 +145,37 @@ Jenkins
 		root@photon-machine [ ~ ]# docker run --name JenkinsC1 -u root -d -p 8080:8080 -v /var/jenkins_home:/var/jenkins_home jenkinsci/blueocean
 		Unable to find image 'jenkinsci/blueocean:latest' locally
 		latest: Pulling from jenkinsci/blueocean
-		6c40cc604d8e: Pull complete 
-		e78b80385239: Pull complete 
-		47317d99e629: Pull complete 
-		e651d30ba34b: Pull complete 
-		42159bb0ced7: Pull complete 
-		4145a5ee1b72: Pull complete 
-		0697b7597004: Pull complete 
-		9097a8982f72: Pull complete 
-		a0192c4a1ef6: Pull complete 
-		2df581cf3939: Pull complete 
-		92ea0574091a: Pull complete 
-		546bbe2b2fc4: Pull complete 
-		ba4b927cb427: Pull complete 
-		3e8df40c7e04: Pull complete 
-		d5e5f18f42f7: Pull complete 
-		6c6f58edeb85: Pull complete 
+		6c40cc604d8e: Pull complete
+		e78b80385239: Pull complete
+		47317d99e629: Pull complete
+		e651d30ba34b: Pull complete
+		42159bb0ced7: Pull complete
+		4145a5ee1b72: Pull complete
+		0697b7597004: Pull complete
+		9097a8982f72: Pull complete
+		a0192c4a1ef6: Pull complete
+		2df581cf3939: Pull complete
+		92ea0574091a: Pull complete
+		546bbe2b2fc4: Pull complete
+		ba4b927cb427: Pull complete
+		3e8df40c7e04: Pull complete
+		d5e5f18f42f7: Pull complete
+		6c6f58edeb85: Pull complete
 		Digest: sha256:2bf8e2ca1da955ec312dc4f7e75c548eab0ef6ed1e5c848e03e80db183a284cb
 		Status: Downloaded newer image for jenkinsci/blueocean:latest
 		baf7e3b17c3350ce01e468b3ad7f3813ddc83731dca59d87ab5e527e8f9a78ca
 		root@photon-machine [ ~ ]# docker ps
 		CONTAINER ID        IMAGE                 COMMAND                  CREATED             STATUS              PORTS                               NAMES
-		baf7e3b17c33        jenkinsci/blueocean   "/sbin/tini -- /usr/…"   2 minutes ago       Up 2 minutes        0.0.0.0:8080->8080/tcp, 50000/tcp   JenkinsC1
+		baf7e3b17c33        jenkinsci/blueocean   "/sbin/tini -- /usr/ï¿½"   2 minutes ago       Up 2 minutes        0.0.0.0:8080->8080/tcp, 50000/tcp   JenkinsC1
 
-		
+
 		http://172.31.28.93:8080
 
 
 		Ingresar al bach del contenedor con Jenkins: docker exec -it JenkinsC1 bash
 
 
-		Para ver luego: 
-		
+		Para ver luego:
+
 				docker run -u root -d -p 8080:8080 -p 50000:50000 -v /home:/home -v /var/jenkins_home:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock jenkinsci/blueocean
 				Nota: port 50000 gives you access to a remote Java (JIRA) API.
