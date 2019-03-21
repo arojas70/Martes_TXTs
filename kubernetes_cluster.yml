@@ -1,0 +1,68 @@
+# Tasks for both Master & Minon nodes
+#
+
+# Tasks for Master node only
+- hosts: master
+  tasks:
+    - name: Configure hostname
+      shell: echo "{{master_hostname}}" > /etc/hostname
+
+# Tasks for Minon1 node only
+- hosts: minion1
+  tasks:
+    - name: Configure hostname
+      shell: echo "{{minion1_hostname}}" > /etc/hostname
+
+# Tasks for Minon2 node only
+- hosts: minion2
+  tasks:
+    - name: Configure hostname
+      shell: echo "{{minion2_hostname}}" > /etc/hostname
+
+- hosts: kubernetes_cluster
+  tasks:
+
+    - name: Configuring /etc/sysconfig/proxy
+      lineinfile:
+        dest=/etc/sysconfig/proxy backup=yes
+        regexp='^{{item.key}}'
+        line='{{item.value}}'
+      with_items:
+        - { key: "PROXY_ENABLED", value: "PROXY_ENABLED=\"yes\"" }
+        - { key: "HTTP_PROXY", value: "HTTP_PROXY=\"{{http_proxy}}\"" }
+        - { key: "HTTPS_PROXY", value: "HTTPS_PROXY=\"{{http_proxy}}\"" }
+        - { key: "GOPHER_PROXY", value: "NO_PROXY=\"10.0.0.0/16,172.31.0.0/16,localhost\"" }
+
+    - name: Create directory
+      file: path=/etc/systemd/system/docker.service.d state=directory
+
+    - name: Configuring /etc/systemd/system/docker.service.d/http-proxy.conf
+      shell: |
+        cat > /etc/systemd/system/docker.service.d/http-proxy.conf << EOF
+          [Service]
+          Environment="HTTP_PROXY={{http_proxy}}"
+
+    - name: Configuring /etc/tdnf/tdnf.conf
+      shell: echo "proxy={{http_proxy}}" >> /etc/tdnf/tdnf.conf
+
+    - name: Updating OS
+      shell: /usr/bin/tdnf -y update
+
+    - name: Installing Kubernetes
+      shell: /usr/bin/tdnf -y install kubernetes-kubeadm
+
+    - name: Adding Master/Minions hostname to /etc/hosts
+      shell: |
+        /usr/bin/echo "{{master_ip}} {{master_hostname}}" >> /etc/hosts
+        /usr/bin/echo "{{minion1_ip}} {{minion1_hostname}}" >> /etc/hosts
+        /usr/bin/echo "{{minion2_ip}} {{minion2_hostname}}" >> /etc/hosts
+
+    - name: Enabling Services (etcd,kube-apiserver,kube-controller-manager,kube-scheduler)
+      shell: |
+        /usr/bin/systemctl enable docker
+        /usr/bin/systemctl restart docker
+        /usr/bin/systemctl enable kubelet
+        /usr/bin/systemctl restart kubelet
+
+    - name: Reboot
+      shell: reboot
