@@ -1,0 +1,180 @@
+Project Photon OS™ is an open source, minimal Linux container host that is optimized for cloud-native applications, cloud platforms, and VMware infrastructure. 
+
+	https://vmware.github.io/photon/
+
+	Photon OS 3.0 introduces ARM64 support (Raspberry Pi3)
+
+	Documentación: https://vmware.github.io/photon/assets/files/html/3.0/
+	
+
+	OVA: photon-hw11-3.0-26156e2.ova
+	PassRoot: changeme
+
+
+	Networking 
+	
+		hay que remover el archivo que viene de manera predeterminada para dhcp en el caso de querer usar estático:
+
+			root@photon-machine [ ~ ]# mv /etc/systemd/network/99-dhcp-en.network /etc/systemd/network/10-static-en.network
+
+		root@photon-machine [ ~ ]# cat /etc/systemd/network/10-static-en.network 
+		[Match]
+		Name=eth0
+
+		[Network]
+		Address=172.31.28.93/22
+		Gateway=172.31.31.254
+
+		Nota: De manera predeterminada viene con ICMP filtrado por iptables
+
+
+
+	Docker
+
+		root@photon-machine [ ~ ]# docker --version
+		Docker version 18.06.1, build e68fc7a
+		root@photon-machine [ ~ ]# docker info
+		Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+
+		Levantar el demonio de docker:
+
+			systemctl status docker.service 
+			systemctl enable docker.service
+			ip a
+			systemctl start docker.service 
+			systemctl status docker.service 
+			ip a
+
+
+		root@photon-machine [ ~ ]# docker info 
+		Containers: 0
+		 Running: 0
+		 Paused: 0
+		 Stopped: 0
+		Images: 0
+		Server Version: 18.06.1
+		Storage Driver: overlay2
+		 Backing Filesystem: extfs
+		 Supports d_type: true
+		 Native Overlay Diff: true
+		Logging Driver: json-file
+		Cgroup Driver: cgroupfs
+		Plugins:
+		 Volume: local
+		 Network: bridge host macvlan null overlay
+		 Log: awslogs fluentd gcplogs gelf journald json-file logentries splunk syslog
+		Swarm: inactive
+		Runtimes: runc
+		Default Runtime: runc
+		Init Binary: docker-init
+		containerd version: 468a545b9edcd5932818eb9de8e72413e616e86e
+		runc version: 69663f0bd4b60df09991c08812a60108003fa340
+		init version: fec3683
+		Security Options:
+		 apparmor
+		 seccomp
+		  Profile: default
+		Kernel Version: 4.19.15-1.ph3-esx
+		Operating System: VMware Photon OS/Linux
+		OSType: linux
+		Architecture: x86_64
+		CPUs: 1
+		Total Memory: 1.951GiB
+		Name: photon-machine
+		ID: DEBF:DTVV:N2KX:HB42:IJDH:JCPT:S6C6:NATG:Q3DR:RM3C:3PZZ:CLWD
+		Docker Root Dir: /var/lib/docker
+		Debug Mode (client): false
+		Debug Mode (server): false
+		Registry: https://index.docker.io/v1/
+		Labels:
+		Experimental: false
+		Insecure Registries:
+		 127.0.0.0/8
+		Live Restore Enabled: false
+
+
+		Comandos básicos (http://www.virten.net/2015/04/basic-commands-for-vmware-photon-and-docker/)
+
+
+				- Version e Info				docker version, docker info
+
+				- Listar imágenes				docker images
+				- Buscar imágenes				docker search xxx
+				- Bajar imágenes				docker pull <image>
+				- Bajar imágen verificando confianza		DOCKER_CONTENT_TRUST=1 docker pull <image>	(https://docs.docker.com/docker-hub/publish/trustchain/)
+				- Remover imagen				docker rmi xxxx
+
+				- Correr una imágen (se crea un container)	docker run xxx    (--restart=always para autoarranque)
+				- Ver logs de actividad del contenedor		docker logs -f xxx
+				- Listar containers				docker ps -a
+				- Remover containers				docker rm xxxxx
+
+				- Detener la ejecución de un contenedor		docker stop
+				- Relanzar un contenedor			docker start
+
+				- Ejecutar comandos dentro del contenedor	docker exec
+
+		Configuración de docker para su salida hacia Internet vía Proxy
+
+			root@photon-machine [ ~ ]#mkdir /etc/systemd/system/docker.service.d/
+			root@photon-machine [ ~ ]# cat /etc/systemd/system/docker.service.d/http-proxy.conf
+			[Service]
+			Environment="HTTP_PROXY=http://172.31.28.17:8080/"
+
+
+			root@photon-machine [ ~ ]# systemctl daemon-reload
+			root@photon-machine [ ~ ]# systemctl restart docker.service
+
+
+
+Jenkins
+
+	Creo el directorio /var/jenkins_home para tener la persistencia de los datos del contenedor de Jenkins sobre Photon
+	
+		root@photon-machine [ ~ ]# mkdir /var/jenkins_home
+
+		docker run -u root -d -p 8080:8080 -v /var/jenkins_home:/var/jenkins_home jenkinsci/blueocean
+
+			docker run [OPTIONS] IMAGE
+				-u, --user string                           Username or UID (format: <name|uid>[:<group|gid>])
+				-d, --detach                                Run container in background and print container ID
+				-p, --publish list                          Publish a container's port(s) to the host (default [])
+				-v, --volume list                           Bind mount a volume (default [])
+
+		root@photon-machine [ ~ ]# docker run --name JenkinsC1 -u root -d -p 8080:8080 -v /var/jenkins_home:/var/jenkins_home jenkinsci/blueocean
+		Unable to find image 'jenkinsci/blueocean:latest' locally
+		latest: Pulling from jenkinsci/blueocean
+		6c40cc604d8e: Pull complete 
+		e78b80385239: Pull complete 
+		47317d99e629: Pull complete 
+		e651d30ba34b: Pull complete 
+		42159bb0ced7: Pull complete 
+		4145a5ee1b72: Pull complete 
+		0697b7597004: Pull complete 
+		9097a8982f72: Pull complete 
+		a0192c4a1ef6: Pull complete 
+		2df581cf3939: Pull complete 
+		92ea0574091a: Pull complete 
+		546bbe2b2fc4: Pull complete 
+		ba4b927cb427: Pull complete 
+		3e8df40c7e04: Pull complete 
+		d5e5f18f42f7: Pull complete 
+		6c6f58edeb85: Pull complete 
+		Digest: sha256:2bf8e2ca1da955ec312dc4f7e75c548eab0ef6ed1e5c848e03e80db183a284cb
+		Status: Downloaded newer image for jenkinsci/blueocean:latest
+		baf7e3b17c3350ce01e468b3ad7f3813ddc83731dca59d87ab5e527e8f9a78ca
+		root@photon-machine [ ~ ]# docker ps
+		CONTAINER ID        IMAGE                 COMMAND                  CREATED             STATUS              PORTS                               NAMES
+		baf7e3b17c33        jenkinsci/blueocean   "/sbin/tini -- /usr/…"   2 minutes ago       Up 2 minutes        0.0.0.0:8080->8080/tcp, 50000/tcp   JenkinsC1
+
+		
+		http://172.31.28.93:8080
+
+
+		Ingresar al bach del contenedor con Jenkins: docker exec -it JenkinsC1 bash
+
+
+		Para ver luego: 
+		
+				docker run -u root -d -p 8080:8080 -p 50000:50000 -v /home:/home -v /var/jenkins_home:/var/jenkins_home -v /var/run/docker.sock:/var/run/docker.sock jenkinsci/blueocean
+				Nota: port 50000 gives you access to a remote Java (JIRA) API.
