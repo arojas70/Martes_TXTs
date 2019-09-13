@@ -174,7 +174,7 @@ Jenkins
 		http://172.31.28.93:8080
 
 
-		Ingresar al bach del contenedor con Jenkins: docker exec -it JenkinsC1 bash
+		Ingresar al bach del contenedor con Jenkins: docker exec -it JenkinsC1 bash f
 
 
 		Para ver luego:
