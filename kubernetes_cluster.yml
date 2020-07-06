@@ -1,7 +1,7 @@
 # Tasks for both Master & Minon nodes
 #
 
-# Tasks for Master node only
+# Tasks for Master node Only
 - hosts: master
   tasks:
     - name: Configure hostname
